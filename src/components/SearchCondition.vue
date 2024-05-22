@@ -1,5 +1,4 @@
 <template>
-  <h1 class="text-center">Anime DB</h1>
   <v-container>
     <v-row>
       <v-col xs="12">
@@ -25,6 +24,12 @@
       </v-col>
     </v-row>
     <v-row>
+      <v-col>
+        <v-text-field v-model="filterTitle" label="タイトル" variant="outlined">
+        </v-text-field>
+      </v-col>
+    </v-row>
+    <!-- <v-row>
       <v-col>
         <v-card v-for="work in works" key="work">
           <v-card-text>{{ work.title }}</v-card-text>
@@ -52,9 +57,8 @@
           </v-card-actions>
         </v-card>
       </v-col>
-    </v-row>
+    </v-row> -->
   </v-container>
-
   <v-dialog v-model="loading">
     <v-container class="d-flex justify-center">
       <v-progress-circular
@@ -67,13 +71,17 @@
 </template>
 
 <script setup>
-import { onMounted, ref, watch, watchEffect } from "vue";
+import { onMounted, ref, watch } from "vue";
+import { commonFunctions } from "../utils/utils";
+
+const emit = defineEmits(["get-works"]);
 
 const loading = ref(false);
 const works = ref([]);
+const filterTitle = ref(null);
 const filterYear = ref(new Date().getFullYear());
 const filterSeason = ref("all");
-const years = generateYearRange(2024, 1990);
+const years = commonFunctions.generateYearRange(2024, 1990);
 const seasons = [
   { value: "all", title: "全て" },
   { value: "spring", title: "春" },
@@ -82,49 +90,27 @@ const seasons = [
   { value: "winter", title: "冬" },
 ];
 
-async function fetchDataFromAnnict(year, season) {
-  const response = await fetch(
-    `${
-      import.meta.env.VITE_ANNICT_URL
-    }?filter_season=${year}-${season}&per_page=50&sort_watchers_count=desc`,
-    {
-      headers: {
-        Authorization: `Bearer ${import.meta.env.VITE_ACCESS_TOKEN}`,
-      },
-    }
-  );
-  const data = response.json();
-  return data;
-}
-
-function generateYearRange(start, end) {
-  const range = [];
-  for (let year = start; year >= end; year--) {
-    range.push(year);
-  }
-  return range;
-}
-
 async function loadAnimeWorks() {
   loading.value = true;
-  const data = await fetchDataFromAnnict(filterYear.value, filterSeason.value);
+  const data = await commonFunctions.fetchDataFromAnnict(
+    filterYear.value,
+    filterSeason.value
+  );
   loading.value = false;
   return data.works;
 }
 
 watch(filterYear, async (val) => {
   works.value = await loadAnimeWorks();
+  emit("get-works", works.value);
 });
 
 watch(filterSeason, async (val) => {
   works.value = await loadAnimeWorks();
+  emit("get-works", works.value);
 });
 onMounted(async () => {
   works.value = await loadAnimeWorks();
-  console.log("works:", works.value);
-
-  // for (let year = new Date().getFullYear(); year >= 1990; year--) {
-  //   years.value.push(year);
-  // }
+  emit("get-works", works.value);
 });
 </script>
