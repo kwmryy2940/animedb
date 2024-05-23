@@ -49,12 +49,10 @@
               </v-btn>
             </v-card-actions>
           </v-col>
-          <v-col cols="3">
-            <v-card-item prepend-icon="fa:fa-solid fa-eye">{{
-              work.watchers_count
-            }}</v-card-item>
-          </v-col>
         </v-row>
+        <v-card-item prepend-icon="fa:fa-solid fa-eye">{{
+          work.watchers_count
+        }}</v-card-item>
       </v-card>
     </v-col>
   </v-row>
