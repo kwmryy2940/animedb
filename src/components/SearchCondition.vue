@@ -29,35 +29,7 @@
         </v-text-field>
       </v-col>
     </v-row>
-    <!-- <v-row>
-      <v-col>
-        <v-card v-for="work in works" key="work">
-          <v-card-text>{{ work.title }}</v-card-text>
-          <v-card-text>
-            <template v-if="work.images.recommended_url.length > 0">
-              <v-img :src="work.images.recommended_url"></v-img>
-            </template>
-            <template v-else-if="work.images.facebook.og_image_url.length > 0">
-              <v-img :src="work.images.facebook.og_image_url"></v-img>
-            </template>
-            <template v-else>
-              <v-img
-                src="https://placehold.jp/d1d1d1/ffffff/250x131.png?text=No%20Image"
-              ></v-img>
-            </template>
-          </v-card-text>
-          <v-card-actions>
-            <v-btn
-              color="primary"
-              :href="work.official_site_url"
-              target="_blank"
-              rel="noopener noreferrer"
-              >公式サイト</v-btn
-            >
-          </v-card-actions>
-        </v-card>
-      </v-col>
-    </v-row> -->
+    <v-btn color="primary" @click="handleClick">検索</v-btn>
   </v-container>
   <v-dialog v-model="loading">
     <v-container class="d-flex justify-center">
@@ -71,14 +43,13 @@
 </template>
 
 <script setup>
-import { onMounted, ref, watch } from "vue";
+import { onMounted, ref } from "vue";
 import { commonFunctions } from "../utils/utils";
 
 const emit = defineEmits(["get-works"]);
 
 const loading = ref(false);
-const works = ref([]);
-const filterTitle = ref(null);
+const filterTitle = ref("");
 const filterYear = ref(new Date().getFullYear());
 const filterSeason = ref("all");
 const years = commonFunctions.generateYearRange(2024, 1990);
@@ -94,23 +65,20 @@ async function loadAnimeWorks() {
   loading.value = true;
   const data = await commonFunctions.fetchDataFromAnnict(
     filterYear.value,
-    filterSeason.value
+    filterSeason.value,
+    filterTitle.value
   );
   loading.value = false;
   return data.works;
 }
 
-watch(filterYear, async (val) => {
-  works.value = await loadAnimeWorks();
-  emit("get-works", works.value);
-});
+const handleClick = async (e) => {
+  const works = await loadAnimeWorks();
+  emit("get-works", works);
+};
 
-watch(filterSeason, async (val) => {
-  works.value = await loadAnimeWorks();
-  emit("get-works", works.value);
-});
 onMounted(async () => {
-  works.value = await loadAnimeWorks();
-  emit("get-works", works.value);
+  const works = await loadAnimeWorks();
+  emit("get-works", works);
 });
 </script>

@@ -1,10 +1,10 @@
-import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
+import { defineConfig } from "vite";
+import vue from "@vitejs/plugin-vue";
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [vue()],
-  base:"/animedb",
+  base: "/animedb",
   build: {
     // outDir: "../src/main/resources/static",
     emptyOutDir: true,
@@ -16,14 +16,15 @@ export default defineConfig({
       },
     },
   },
-  outDir:"./dist",
+  outDir: "./dist",
   server: {
-    // proxy: {
-    //   "/api": {
-    //     target: process.env.VITE_API_URL,
-    //     changeOrigin: true,
-    //   },
-    // },
+    proxy: {
+      "/syoboiapi": {
+        target: "https://cal.syoboi.jp",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/syoboiapi/, ""), // /apiurlを削除してルーティングする
+      },
+    },
     port: 5173,
   },
-})
+});
