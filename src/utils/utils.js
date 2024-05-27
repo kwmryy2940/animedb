@@ -23,6 +23,9 @@ export const commonFunctions = {
     return range;
   },
   fetchDataFromSyoboiByTID: async (tid) => {
+    console.log("VITE_SYOBOI_URL:", import.meta.env.VITE_SYOBOI_URL);
+    console.log("VITE_NODE_ENV:", import.meta.env.VITE_NODE_ENV);
+
     const domain =
       import.meta.env.VITE_NODE_ENV === "production"
         ? import.meta.env.VITE_SYOBOI_URL
