@@ -19,11 +19,7 @@
         <v-row>
           <v-col cols="9">
             <v-card-actions>
-              <v-btn
-                color="primary"
-                @click="onCardClick(work, work.syobocal_tid)"
-                >詳細</v-btn
-              >
+              <v-btn color="primary" @click="onClickDetail(work)">詳細</v-btn>
               <v-btn
                 color="primary"
                 :href="work.official_site_url"
@@ -59,11 +55,14 @@
   <v-dialog v-model="dialog">
     <v-sheet>
       <v-card>
-        <v-list v-for="staff in staffMembers" :key="staff">
-          <v-list-item>{{ staff }}</v-list-item>
-        </v-list>
         <v-list v-for="cast in castMembers" :key="cast">
-          <v-list-item>{{ cast }}</v-list-item>
+          <v-list-item>{{ cast.character.name }}:{{ cast.name }}</v-list-item>
+        </v-list>
+        <v-list v-for="person in staffPersons" :key="person">
+          <v-list-item>{{ person.role_text==="その他"?person.role_other:person.role_text }}:{{ person.name }}</v-list-item>
+        </v-list>
+        <v-list v-for="organization in staffOrganizations" :key="organization">
+          <v-list-item>{{ organization.role_text==="その他"?organization.role_other:organization.role_text }}:{{ organization.name }}</v-list-item>
         </v-list>
       </v-card>
     </v-sheet>
@@ -84,7 +83,8 @@ const works = computed(() => {
 
 const dialog = ref(false);
 const animeData = ref(null);
-const staffMembers = ref([]);
+const staffPersons = ref([]);
+const staffOrganizations = ref([]);
 const castMembers = ref([]);
 
 async function pickupCastMembers(comment) {
@@ -127,6 +127,31 @@ async function pickupStaffMembers(comment) {
     return s !== "";
   });
   return staffDisplayData;
+}
+
+async function onClickDetail(work) {
+  console.log("work:", work);
+
+  const castsArray= await commonFunctions.fetchCastDataFromAnnict(work.id);
+  castMembers.value =castsArray.casts;
+  
+  const staffsArray = await commonFunctions.fetchStaffDataFromAnnict(work.id);
+  
+  // スタッフ
+  staffPersons.value = await staffsArray.staffs.filter((staff) => {
+    return staff.person !== undefined;
+  });
+
+  // 制作団体
+  staffOrganizations.value= staffsArray.staffs.filter((staff) => {
+    return staff.organization !== undefined;
+  });
+
+  console.log("cast:", castMembers.value);
+  console.log("staff persons:", staffPersons.value);
+  console.log("staff organizations:", staffOrganizations.value);
+
+  dialog.value=true;
 }
 
 async function onCardClick(work, tid) {
