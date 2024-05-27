@@ -23,8 +23,15 @@ export const commonFunctions = {
     return range;
   },
   fetchDataFromSyoboiByTID: async (tid) => {
+    const domain =
+      import.meta.VITE_NODE_ENV === "production"
+        ? import.meta.VITE_SYOBOI_URL
+        : "/syoboiapi";
+
     const response = await fetch(
-      `/syoboiapi/db.php?Command=TitleLookup&TID=${tid}`
+      `${domain}/db.php?Command=TitleLookup&TID=${tid}`
+      // `/syoboiapi/db.php?Command=TitleLookup&TID=${tid}`
+      // `${import.meta.env.VITE_SYOBOI_URL}/db.php?Command=TitleLookup&TID=${tid}`
     );
 
     const dataText = await response.text();
