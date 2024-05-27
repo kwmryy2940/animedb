@@ -17,14 +17,14 @@ export default defineConfig({
     },
   },
   outDir: "./dist",
-  server: {
-    proxy: {
-      "/syoboiapi": {
-        target: "https://cal.syoboi.jp",
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/syoboiapi/, ""), // /apiurlを削除してルーティングする
-      },
+  // server: {
+  proxy: {
+    "/syoboiapi": {
+      target: "https://cal.syoboi.jp",
+      changeOrigin: true,
+      rewrite: (path) => path.replace(/^\/syoboiapi/, ""), // /apiurlを削除してルーティングする
     },
+    // },
     port: 5173,
   },
 });

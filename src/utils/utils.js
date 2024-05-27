@@ -29,20 +29,14 @@ export const commonFunctions = {
 
     const domain =
       import.meta.env.PROD === true
-        ? import.meta.env.VITE_SYOBOI_URL
-        : "/syoboiapi";
+        ? `${import.meta.env.VITE_PROD_URL}/syoboiapi`
+        : `${import.meta.env.VITE_DEV_URL}/syoboiapi`;
 
     console.log("domain:", domain);
 
     const response = await fetch(
-      `${domain}/db.php?Command=TitleLookup&TID=${tid}`,
-      {
-        headers: {
-          "Access-Control-Allow-Methods": "GET, POST, PATCH, DELETE, OPTIONS",
-          "Access-Control-Allow-Origin": "*",
-        },
-      }
-      // `/syoboiapi/db.php?Command=TitleLookup&TID=${tid}`
+      // `${domain}/db.php?Command=TitleLookup&TID=${tid}`
+      `/syoboiapi/db.php?Command=TitleLookup&TID=${tid}`
       // `${import.meta.env.VITE_SYOBOI_URL}/db.php?Command=TitleLookup&TID=${tid}`
     );
 
