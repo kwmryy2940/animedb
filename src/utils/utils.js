@@ -28,6 +28,8 @@ export const commonFunctions = {
         ? import.meta.VITE_SYOBOI_URL
         : "/syoboiapi";
 
+    console.log("domain:", domain);
+
     const response = await fetch(
       `${domain}/db.php?Command=TitleLookup&TID=${tid}`
       // `/syoboiapi/db.php?Command=TitleLookup&TID=${tid}`
