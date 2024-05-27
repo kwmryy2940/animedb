@@ -35,7 +35,13 @@ export const commonFunctions = {
     console.log("domain:", domain);
 
     const response = await fetch(
-      `${domain}/db.php?Command=TitleLookup&TID=${tid}`
+      `${domain}/db.php?Command=TitleLookup&TID=${tid}`,
+      {
+        headers: {
+          "Access-Control-Allow-Methods": "GET, POST, PATCH, DELETE, OPTIONS",
+          "Access-Control-Allow-Origin": "*",
+        },
+      }
       // `/syoboiapi/db.php?Command=TitleLookup&TID=${tid}`
       // `${import.meta.env.VITE_SYOBOI_URL}/db.php?Command=TitleLookup&TID=${tid}`
     );
