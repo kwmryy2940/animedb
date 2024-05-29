@@ -8,12 +8,37 @@ export const commonFunctions = {
     }
     return range;
   },
+  // AnnictのOAtuh認証のアクセストークンを取得
+  getAccessTokenOauth: async () => {
+    const body = {
+      "client_id": import.meta.env.VITE_ANNICT_CRIENTID,
+      "client_secret": import.meta.env.VITE_ANNICT_CRIENTSECRET,
+      "grant_type": "authorization_code",
+      "redirect_uri": import.meta.env.VITE_ANNICT_URI,
+      "code": import.meta.env.VITE_ANNICT_CODE,
+    };
+
+    const response = await fetch(
+      `${import.meta.env.VITE_ANNICT_URL}/oauth/token`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      }
+    );
+    const data = response.json();
+    return data;
+  },
+
   // Annictから放送年・放送シーズン・タイトルで作品情報を検索
-  fetchDataFromAnnict: async (year, season, title) => {
+  fetchDataFromAnnict: async (year, season, title,page) => {
     const response = await fetch(
       `${
         import.meta.env.VITE_ANNICT_URL
-      }/works?filter_season=${year}-${season}&filter_title=${title}&per_page=50&sort_watchers_count=desc`,
+        // }/works?filter_season=${year}-${season}&filter_title=${title}&per_page=50&sort_watchers_count=desc`,
+      }/v1/works?filter_season=${year}-${season}&filter_title=${title}&page=${page}&per_page=50&sort_watchers_count=desc`,
       {
         headers: {
           Authorization: `Bearer ${import.meta.env.VITE_ACCESS_TOKEN}`,
@@ -28,7 +53,7 @@ export const commonFunctions = {
     const response = await fetch(
       `${
         import.meta.env.VITE_ANNICT_URL
-      }/casts?filter_work_id=${workId}&per_page=50&sort_id=asc`,
+      }/v1/casts?filter_work_id=${workId}&per_page=50&sort_id=asc`,
       {
         headers: {
           Authorization: `Bearer ${import.meta.env.VITE_ACCESS_TOKEN}`,
@@ -43,7 +68,7 @@ export const commonFunctions = {
     const response = await fetch(
       `${
         import.meta.env.VITE_ANNICT_URL
-      }/staffs?filter_work_id=${workId}&per_page=50&sort_id=asc`,
+      }/v1/staffs?filter_work_id=${workId}&per_page=50&sort_id=asc`,
       {
         headers: {
           Authorization: `Bearer ${import.meta.env.VITE_ACCESS_TOKEN}`,
@@ -55,44 +80,22 @@ export const commonFunctions = {
   },
   // Annictから作品の放送予定を取得
   fetchProgramDataFromAnnict: async (workId) => {
-
-    const array=[9696];
+    const array = [4681];
 
     const response = await fetch(
       `${
         import.meta.env.VITE_ANNICT_URL
-      }/me/programs?filter_work_ids=4681,75187&per_page=50&sort_id=asc`,
-      {
-        headers: {
-          Authorization: `Bearer ${import.meta.env.VITE_ACCESS_TOKEN}`,
-        },
-      }
+        // }/me/programs?filter_work_ids=${array}&per_page=50&sort_id=asc`,
+      }/v1/me/programs?sort_started_at=desc&page=1&filter_started_at_gt=2016/05/05 02:00&access_token=${
+        import.meta.env.VITE_ACCESS_TOKEN
+      }`
+      // {
+      //   headers: {
+      //     Authorization: `Bearer ${import.meta.env.VITE_ACCESS_TOKEN}`,
+      //   },
+      // }
     );
     const data = response.json();
     return data;
-  },
-  fetchDataFromSyoboiByTID: async (tid) => {
-    console.log("import.meta.env.PROD=", import.meta.env.PROD);
-    console.log("import.meta.env.DEV=", import.meta.env.DEV);
-    console.log("VITE_SYOBOI_URL:", import.meta.env.VITE_SYOBOI_URL);
-
-    const domain =
-      import.meta.env.PROD === true
-        ? `${import.meta.env.VITE_PROD_URL}/syoboiapi`
-        : `${import.meta.env.VITE_DEV_URL}/syoboiapi`;
-
-    console.log("domain:", domain);
-
-    const response = await fetch(
-      // `${domain}/db.php?Command=TitleLookup&TID=${tid}`
-      `/syoboiapi/db.php?Command=TitleLookup&TID=${tid}`
-      // `${import.meta.env.VITE_SYOBOI_URL}/db.php?Command=TitleLookup&TID=${tid}`
-    );
-
-    const dataText = await response.text();
-    const dataJsonText = xml2json(dataText, { compact: true, spaces: 4 });
-    const dataJson = JSON.parse(dataJsonText);
-
-    return dataJson;
   },
 };

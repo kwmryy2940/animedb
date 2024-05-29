@@ -52,17 +52,51 @@
       </v-card>
     </v-col>
   </v-row>
+
   <v-dialog v-model="dialog">
     <v-sheet>
       <v-card>
-        <v-list v-for="cast in castMembers" :key="cast">
-          <v-list-item>{{ cast.character.name }}:{{ cast.name }}</v-list-item>
+        <v-card-actions class="justify-end"
+          ><v-btn icon="fa:fa-solid fa-xmark" @click="dialog = !dialog"></v-btn
+        ></v-card-actions>
+        <v-list>
+          <v-card-title
+            ><u><b>キャスト</b> </u></v-card-title
+          >
+          <v-list-item
+            v-for="cast in castMembers"
+            :key="cast"
+            :title="`${cast.character.name}:${cast.name}`"
+          >
+          </v-list-item>
         </v-list>
-        <v-list v-for="person in staffPersons" :key="person">
-          <v-list-item>{{ person.role_text==="その他"?person.role_other:person.role_text }}:{{ person.name }}</v-list-item>
+        <v-list>
+          <v-card-title
+            ><u><b>スタッフ</b> </u></v-card-title
+          >
+          <v-list-item
+            v-for="person in staffPersons"
+            :key="person"
+            :title="`${
+              person.role_text === 'その他'
+                ? person.role_other
+                : person.role_text
+            }:${person.name}`"
+          >
+          </v-list-item>
         </v-list>
-        <v-list v-for="organization in staffOrganizations" :key="organization">
-          <v-list-item>{{ organization.role_text==="その他"?organization.role_other:organization.role_text }}:{{ organization.name }}</v-list-item>
+        <v-list>
+          <v-card-title
+            ><u><b>制作団体</b> </u></v-card-title
+          >
+          <v-list-item
+            v-for="organization in staffOrganizations"
+            :key="organization"
+            :title="`${ organization.role_text === 'その他'
+                    ? organization.role_other
+                    : organization.role_text}:${organization.name}`"
+          >
+          </v-list-item>
         </v-list>
       </v-card>
     </v-sheet>
@@ -70,7 +104,7 @@
 </template>
 
 <script setup>
-import { ref, computed, defineComponent } from "vue";
+import { ref, computed, onMounted, onBeforeMount, watch } from "vue";
 import { commonFunctions } from "../utils/utils";
 
 const props = defineProps({
@@ -82,91 +116,31 @@ const works = computed(() => {
 });
 
 const dialog = ref(false);
-const animeData = ref(null);
 const staffPersons = ref([]);
 const staffOrganizations = ref([]);
 const castMembers = ref([]);
 
-async function pickupCastMembers(comment) {
-  // キャスト情報の抜き出し（キャスト情報の後にテキストがある場合とない場合の２パターンがある）
-  let dataCast = [];
-  if (comment.match(/\*キャスト[\s\S]*\*/)) {
-    dataCast = comment.match(/\*キャスト[\s\S]*\*/);
-  } else {
-    dataCast = comment.match(/\*キャスト[\s\S]*/);
-  }
-  // 不要な部分を取り除く
-  const castText = dataCast[0]
-    .replace(/\*キャスト\r\n/, "")
-    .replace(/\r\n\*/, "");
-  // 改行を区切りとして配列に変換する
-  const castArray = castText.split(/\r\n/);
-  // 配列の空要素を削除
-  const castDisplayData = castArray.filter(function (s) {
-    return s !== "";
-  });
-  return castDisplayData;
-}
-
-async function pickupStaffMembers(comment) {
-  // スタッフ情報の抜き出し（スタッフ情報の後にテキストがある場合とない場合の２パターンがある）
-  let dataCast = [];
-  if (comment.match(/\*スタッフ[\s\S]*\*/)) {
-    dataCast = comment.match(/\*スタッフ[\s\S]*\*/);
-  } else {
-    dataCast = comment.match(/\*スタッフ[\s\S]*/);
-  }
-  // 不要な部分を取り除く
-  const staffText = dataCast[0]
-    .replace(/\*スタッフ\r\n/, "")
-    .replace(/\r\n\*/, "");
-  // 改行を区切りとして配列に変換する
-  const staffArray = staffText.split(/\r\n/);
-  // 配列の空要素を削除
-  const staffDisplayData = staffArray.filter(function (s) {
-    return s !== "";
-  });
-  return staffDisplayData;
-}
-
 async function onClickDetail(work) {
   console.log("work:", work);
 
-  const castsArray= await commonFunctions.fetchCastDataFromAnnict(work.id);
-  castMembers.value =castsArray.casts;
-  
+  const castsArray = await commonFunctions.fetchCastDataFromAnnict(work.id);
+  castMembers.value = castsArray.casts;
+
   const staffsArray = await commonFunctions.fetchStaffDataFromAnnict(work.id);
-  
+
   // スタッフ
   staffPersons.value = await staffsArray.staffs.filter((staff) => {
     return staff.person !== undefined;
   });
 
   // 制作団体
-  staffOrganizations.value= staffsArray.staffs.filter((staff) => {
+  staffOrganizations.value = staffsArray.staffs.filter((staff) => {
     return staff.organization !== undefined;
   });
 
   console.log("cast:", castMembers.value);
   console.log("staff persons:", staffPersons.value);
   console.log("staff organizations:", staffOrganizations.value);
-
-  dialog.value=true;
-}
-
-async function onCardClick(work, tid) {
-  console.log("work:", work);
-  console.log("TID:", tid);
-
-  if (tid === undefined || tid.length === 0) return;
-
-  animeData.value = await commonFunctions.fetchDataFromSyoboiByTID(tid);
-
-  const comment =
-    animeData.value.TitleLookupResponse.TitleItems.TitleItem.Comment._text;
-
-  castMembers.value = await pickupCastMembers(comment);
-  staffMembers.value = await pickupStaffMembers(comment);
 
   dialog.value = true;
 }
