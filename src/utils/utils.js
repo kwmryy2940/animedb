@@ -3,6 +3,7 @@ import { xml2json } from "xml-js";
 export const commonFunctions = {
   generateYearRange: (start, end) => {
     const range = [];
+    // range.push("");
     for (let year = start; year >= end; year--) {
       range.push(year);
     }
@@ -11,11 +12,11 @@ export const commonFunctions = {
   // AnnictのOAtuh認証のアクセストークンを取得
   getAccessTokenOauth: async () => {
     const body = {
-      "client_id": import.meta.env.VITE_ANNICT_CRIENTID,
-      "client_secret": import.meta.env.VITE_ANNICT_CRIENTSECRET,
-      "grant_type": "authorization_code",
-      "redirect_uri": import.meta.env.VITE_ANNICT_URI,
-      "code": import.meta.env.VITE_ANNICT_CODE,
+      client_id: import.meta.env.VITE_ANNICT_CRIENTID,
+      client_secret: import.meta.env.VITE_ANNICT_CRIENTSECRET,
+      grant_type: "authorization_code",
+      redirect_uri: import.meta.env.VITE_ANNICT_URI,
+      code: import.meta.env.VITE_ANNICT_CODE,
     };
 
     const response = await fetch(
@@ -33,12 +34,20 @@ export const commonFunctions = {
   },
 
   // Annictから放送年・放送シーズン・タイトルで作品情報を検索
-  fetchDataFromAnnict: async (year, season, title,page) => {
+  fetchDataFromAnnict: async (year, season, title, page) => {
+    let apiUrl = `/v1/works?filter_title=${title}&page=${page}&per_page=50&sort_watchers_count=desc&sort_season=desc`;
+
+    console.log("year:",year);
+    console.log("season:",season);
+
+    // 放送年・放送シーズンどちらも選択されている場合のみ絞り込む
+    if (year!==null || season!==null)
+      apiUrl += `&filter_season=${year}-${season}`;
+
     const response = await fetch(
       `${
         import.meta.env.VITE_ANNICT_URL
-        // }/works?filter_season=${year}-${season}&filter_title=${title}&per_page=50&sort_watchers_count=desc`,
-      }/v1/works?filter_season=${year}-${season}&filter_title=${title}&page=${page}&per_page=50&sort_watchers_count=desc`,
+      }${apiUrl}`,
       {
         headers: {
           Authorization: `Bearer ${import.meta.env.VITE_ACCESS_TOKEN}`,

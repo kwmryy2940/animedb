@@ -6,6 +6,7 @@
           v-model="filterYear"
           label="放送年"
           variant="outlined"
+          clearable
           :items="years"
         >
         </v-select>
@@ -18,6 +19,7 @@
           :items="seasons"
           item-title="title"
           item-value="value"
+          clearable
           return-value
         >
         </v-select>
@@ -69,6 +71,7 @@ const years = commonFunctions.generateYearRange(
   1990
 );
 const seasons = [
+  // { value: "", title: "" },
   { value: "spring", title: "春" },
   { value: "summer", title: "夏" },
   { value: "autumn", title: "秋" },
